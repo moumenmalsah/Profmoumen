@@ -1,0 +1,50 @@
+{
+  "entities": {
+    "Content": {
+      "title": "Content Item",
+      "description": "Represents a course, exercise, video, or tool.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Title of the content"
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief description of the content"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["course", "exercise", "video", "tool"],
+          "description": "Category of the content"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["pdf", "youtube", "h5p"],
+          "description": "Type of the content link"
+        },
+        "url": {
+          "type": "string",
+          "description": "URL to the PDF file, YouTube video, or H5P page"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": ["title", "category", "type", "url", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/contents/{contentId}": {
+      "schema": "Content",
+      "description": "Collection of educational content items."
+    }
+  }
+}

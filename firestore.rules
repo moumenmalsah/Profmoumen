@@ -1,0 +1,72 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isTeacher() {
+      return isSignedIn() && 
+             request.auth.token.email == "moumenmalsah@gmail.com" && 
+             request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidContent(data) {
+      return data.keys().hasAll(['title', 'category', 'type', 'url', 'createdAt', 'updatedAt']) &&
+             data.keys().size() == 6 &&
+             data.title is string && data.title.size() <= 200 &&
+             data.category in ['course', 'exercise', 'video', 'tool'] &&
+             data.type in ['pdf', 'youtube', 'h5p'] &&
+             data.url is string && data.url.size() <= 1000 &&
+             data.createdAt == request.time &&
+             data.updatedAt == request.time;
+    }
+
+    function isValidContentUpdate(data) {
+       return data.keys().hasAll(['title', 'category', 'type', 'url', 'createdAt', 'updatedAt']) &&
+             data.keys().size() == 6 &&
+             data.title is string && data.title.size() <= 200 &&
+             data.category in ['course', 'exercise', 'video', 'tool'] &&
+             data.type in ['pdf', 'youtube', 'h5p'] &&
+             data.url is string && data.url.size() <= 1000 &&
+             data.createdAt == existing().createdAt &&
+             data.updatedAt == request.time;
+    }
+
+    // Collection: Contents
+    match /contents/{contentId} {
+      allow read: if true;
+      
+      allow create: if isTeacher() && 
+                      isValidId(contentId) && 
+                      isValidContent(incoming());
+                      
+      allow update: if isTeacher() && 
+                      isValidId(contentId) && 
+                      isValidContentUpdate(incoming()) &&
+                      (incoming().diff(existing()).affectedKeys().hasAny(['title', 'category', 'type', 'url', 'updatedAt']));
+                      
+      allow delete: if isTeacher() && 
+                      isValidId(contentId);
+    }
+  }
+}

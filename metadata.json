@@ -1,0 +1,6 @@
+{
+  "name": "PROFMOUMEN",
+  "description": "Plateforme éducative pour les cours, exercices et vidéos de Professeur Moumen. Inclut un panel admin pour la gestion du contenu.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
